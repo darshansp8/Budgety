@@ -13,6 +13,17 @@ var budgetController = (function (){
         this.value = value
     };
 
+    var calculateTotal = function(type){
+        var sum = 0;
+        // Calculating the total income and expense
+        data.allItems[type].forEach(function(current){
+            sum += current.value;
+        });
+        // Putting the sum in total exp and inc.
+        data.total[type] = sum;
+
+    }
+
     var data = {
         allItems: {
             exp: [],
@@ -21,7 +32,9 @@ var budgetController = (function (){
         total: {
             exp: 0,
             inc: 0,
-        }
+        },
+        budget: 0,
+        percentage: -1
     };
 
     return {
@@ -47,8 +60,31 @@ var budgetController = (function (){
 
             // return the new element
             return newItem;
-            
+        },
 
+        calculateBudget: function(){
+
+            // Calculate total income and expense
+            calculateTotal('exp');
+            calculateTotal('inc');
+
+            // Calculate the budget
+            data.budget = data.total.inc - data.total.exp;
+
+            // Calculate the percentage of income that we spend
+            if(data.total.inc > 0){
+                data.percentage = Math.round((data.total.exp / data.total.inc) * 100);
+            }else{
+                data.percentage = -1;
+            }
+        },
+        getBudget: function(){
+            return {
+                budget: data.budget,
+                percentage: data.percentage,
+                totalInc: data.allItems.inc,
+                totalExp: data.allItems.exp
+            }
         },
         testing: function(){
             console.log(data);
@@ -132,10 +168,13 @@ var dataController = (function(budgetCtrl, UICtrl){
     
     var updateBudget = function(){
         // 1. Calculate the budget
+        budgetCtrl.calculateBudget();
 
         // 2. Return the budget
-
+        var budget = budgetCtrl.getBudget();
+        
         // 3. Display the budget
+        console.log(budget);
     }
 
     var addItemCtrl = function(){
